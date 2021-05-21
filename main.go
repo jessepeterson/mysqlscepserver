@@ -44,7 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	crt, key, err := mysqlDepot.CreateOrLoadCA([]byte(*flCAPass))
+	crt, key, err := mysqlDepot.CreateOrLoadCA([]byte(*flCAPass), 10, "ca", "scep", "US")
 	if err != nil {
 		lginfo.Log("err", err)
 		os.Exit(1)

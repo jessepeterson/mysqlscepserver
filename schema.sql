@@ -7,7 +7,7 @@ CREATE TABLE serials (
 CREATE TABLE certificates (
     serial BIGINT NOT NULL,
 
-    cn               VARCHAR(1024) NULL,
+    name             VARCHAR(1024) NULL,
     not_valid_before DATETIME NOT NULL,
     not_valid_after  DATETIME NOT NULL,
     certificate_pem  TEXT NOT NULL,
