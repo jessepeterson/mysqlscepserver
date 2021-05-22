@@ -40,3 +40,12 @@ CREATE TABLE ca_keys (
 
     CHECK (SUBSTRING(key_pem  FROM 1 FOR  5) = '-----')
 );
+
+CREATE TABLE challenges (
+    challenge CHAR(32),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (challenge)
+);

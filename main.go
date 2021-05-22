@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/subtle"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -10,14 +12,15 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/micromdm/scep/v2/challenge"
 	"github.com/micromdm/scep/v2/depot"
 	scepserver "github.com/micromdm/scep/v2/server"
 )
 
 func main() {
 	var (
-		flDSN = flag.String("dsn", "", "SQL data source name (connection string)")
-		// flAPIKey = flag.String("api", "", "API key for challenge API endpoints")
+		flDSN    = flag.String("dsn", "", "SQL data source name (connection string)")
+		flAPIKey = flag.String("api", "", "API key for challenge API endpoints")
 		flListen = flag.String("listen", envString("SCEP_HTTP_LISTEN", ":8080"), "port to listen on")
 		flCAPass = flag.String("capass", envString("SCEP_CA_PASS", ""), "passwd for the ca.key")
 		flDebug  = flag.Bool("debug", envBool("SCEP_LOG_DEBUG"), "enable debug logging")
@@ -32,14 +35,8 @@ func main() {
 	logger = log.With(logger, "caller", log.DefaultCaller)
 	lginfo := level.Info(logger)
 
-	if *flDSN == "" {
-		fmt.Println("must supply DSN")
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	if *flCAPass == "" {
-		fmt.Println("must supply CA pass")
+	if *flDSN == "" || *flCAPass == "" || *flAPIKey == "" {
+		fmt.Println("must supply DSN, CA pass, and API key")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -62,6 +59,7 @@ func main() {
 		depot.WithValidityDays(3650),
 		depot.WithCAPass(*flCAPass),
 	)
+	signer = challenge.Middleware(mysqlDepot, signer)
 
 	svc, err := scepserver.NewService(crt, key, signer, scepserver.WithLogger(logger))
 	if err != nil {
@@ -77,11 +75,15 @@ func main() {
 		h = scepserver.MakeHTTPHandler(e, svc, log.With(lginfo, "component", "http"))
 	}
 
+	mux := http.NewServeMux()
+	mux.Handle("/scep", h)
+	mux.Handle("/challenge", basicAuth(ChallengeHandlerFunc(mysqlDepot, lginfo), "api", *flAPIKey, "SCEP Challenge"))
+
 	// start http server
 	errs := make(chan error, 2)
 	go func() {
-		lginfo.Log("transport", "http", "liste", *flListen, "msg", "listening")
-		errs <- http.ListenAndServe(*flListen, h)
+		lginfo.Log("transport", "http", "listen", *flListen, "msg", "listening")
+		errs <- http.ListenAndServe(*flListen, mux)
 	}()
 	go func() {
 		c := make(chan os.Signal)
@@ -91,6 +93,44 @@ func main() {
 
 	lginfo.Log("terminated", <-errs)
 
+}
+
+func ChallengeHandlerFunc(store challenge.Store, logger log.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		output := &struct {
+			Error     string `json:"error,omitempty"`
+			Challenge string `json:"challenge,omitempty"`
+		}{}
+		var err error
+		output.Challenge, err = store.SCEPChallenge()
+		if err != nil {
+			output.Error = err.Error()
+			logger.Log("msg", "scep challenge", "err", err)
+		}
+		json, err := json.MarshalIndent(output, "", "\t")
+		if err != nil {
+			logger.Log("msg", "marshal json", "err", err)
+		}
+		w.Header().Set("Content-type", "application/json")
+		_, err = w.Write(json)
+		if err != nil {
+			logger.Log("msg", "writing body", "err", err)
+		}
+	}
+}
+
+func basicAuth(next http.Handler, username, password, realm string) http.HandlerFunc {
+	uBytes := []byte(username)
+	pBytes := []byte(password)
+	return func(w http.ResponseWriter, r *http.Request) {
+		u, p, ok := r.BasicAuth()
+		if !ok || subtle.ConstantTimeCompare([]byte(u), uBytes) != 1 || subtle.ConstantTimeCompare([]byte(p), pBytes) != 1 {
+			w.Header().Set("WWW-Authenticate", `Basic realm="`+realm+`"`)
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
 }
 
 func envString(key, def string) string {

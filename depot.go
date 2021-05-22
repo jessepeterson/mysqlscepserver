@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"database/sql"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"math/big"
@@ -76,16 +77,8 @@ WHERE
 	return crt, key, nil
 }
 
-func (d *MySQLDepot) CreateOrLoadCA(pass []byte, years int, cn, org, country string) (*x509.Certificate, *rsa.PrivateKey, error) {
-	var err error
-	d.crt, d.key, err = d.loadCA(pass)
-	if err != nil {
-		return nil, nil, err
-	}
-	if d.crt != nil && d.key != nil {
-		return d.crt, d.key, nil
-	}
-	_, err = d.db.ExecContext(d.ctx, `INSERT IGNORE INTO serials (serial) VALUES (1)`)
+func (d *MySQLDepot) createCA(pass []byte, years int, cn, org, country string) (*x509.Certificate, *rsa.PrivateKey, error) {
+	_, err := d.db.ExecContext(d.ctx, `INSERT IGNORE INTO serials (serial) VALUES (1)`)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -139,6 +132,18 @@ VALUES
 	return d.crt, d.key, nil
 }
 
+func (d *MySQLDepot) CreateOrLoadCA(pass []byte, years int, cn, org, country string) (*x509.Certificate, *rsa.PrivateKey, error) {
+	var err error
+	d.crt, d.key, err = d.loadCA(pass)
+	if err != nil {
+		return nil, nil, err
+	}
+	if d.crt != nil && d.key != nil {
+		return d.crt, d.key, nil
+	}
+	return d.createCA(pass, years, cn, org, country)
+}
+
 func (d *MySQLDepot) CA(pass []byte) ([]*x509.Certificate, *rsa.PrivateKey, error) {
 	return []*x509.Certificate{d.crt}, d.key, nil
 }
@@ -182,4 +187,33 @@ func (d *MySQLDepot) HasCN(cn string, allowTime int, cert *x509.Certificate, rev
 		return false, err
 	}
 	return ct >= 1, nil
+}
+
+func (d *MySQLDepot) SCEPChallenge() (string, error) {
+	key := make([]byte, 24)
+	_, err := rand.Read(key)
+	if err != nil {
+		return "", err
+	}
+	challenge := base64.StdEncoding.EncodeToString(key)
+	_, err = d.db.ExecContext(d.ctx, `INSERT INTO challenges (challenge) VALUES (?);`, challenge)
+	if err != nil {
+		return "", err
+	}
+	return challenge, nil
+}
+
+func (d *MySQLDepot) HasChallenge(pw string) (bool, error) {
+	result, err := d.db.ExecContext(d.ctx, `DELETE FROM challenges WHERE challenge = ?;`, pw)
+	if err != nil {
+		return false, err
+	}
+	rowCt, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	if rowCt < 1 {
+		return false, errors.New("challenge not found")
+	}
+	return true, nil
 }
