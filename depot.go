@@ -38,8 +38,54 @@ func NewMySQLDepot(conn string) (*MySQLDepot, error) {
 
 var ErrNotImplemented = errors.New("not implemented")
 
+func (d *MySQLDepot) loadCA(pass []byte) (*x509.Certificate, *rsa.PrivateKey, error) {
+	var pemCert, pemKey []byte
+	err := d.db.QueryRowContext(
+		d.ctx, `
+SELECT
+    certificate_pem, key_pem
+FROM
+    certificates INNER JOIN ca_keys
+        ON certificates.serial = ca_keys.serial
+WHERE
+    certificates.serial = 1;`,
+	).Scan(&pemCert, &pemKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	block, _ := pem.Decode(pemCert)
+	if block.Type != "CERTIFICATE" {
+		return nil, nil, errors.New("PEM block not a certificate")
+	}
+	crt, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return nil, nil, err
+	}
+	block, _ = pem.Decode(pemKey)
+	if !x509.IsEncryptedPEMBlock(block) {
+		return nil, nil, errors.New("PEM block not encrypted")
+	}
+	keyBytes, err := x509.DecryptPEMBlock(block, pass)
+	if err != nil {
+		return nil, nil, err
+	}
+	key, err := x509.ParsePKCS1PrivateKey(keyBytes)
+	if err != nil {
+		return nil, nil, err
+	}
+	return crt, key, nil
+}
+
 func (d *MySQLDepot) CreateOrLoadCA(pass []byte, years int, cn, org, country string) (*x509.Certificate, *rsa.PrivateKey, error) {
-	_, err := d.db.ExecContext(d.ctx, `INSERT IGNORE INTO serials (serial) VALUES (1)`)
+	var err error
+	d.crt, d.key, err = d.loadCA(pass)
+	if err != nil {
+		return nil, nil, err
+	}
+	if d.crt != nil && d.key != nil {
+		return d.crt, d.key, nil
+	}
+	_, err = d.db.ExecContext(d.ctx, `INSERT IGNORE INTO serials (serial) VALUES (1)`)
 	if err != nil {
 		return nil, nil, err
 	}
