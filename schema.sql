@@ -22,5 +22,21 @@ CREATE TABLE certificates (
         REFERENCES serials (serial),
 
     CHECK (SUBSTRING(certificate_pem FROM 1 FOR 27) = '-----BEGIN CERTIFICATE-----')
+    CHECK (name IS NULL OR name != '')
 );
 
+CREATE TABLE ca_keys (
+    serial BIGINT NOT NULL,
+
+    key_pem  TEXT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (serial),
+
+    FOREIGN KEY (serial)
+        REFERENCES certificates (serial),
+
+    CHECK (SUBSTRING(key_pem  FROM 1 FOR  5) = '-----')
+);

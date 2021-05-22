@@ -17,6 +17,8 @@ import (
 type MySQLDepot struct {
 	db  *sql.DB
 	ctx context.Context
+	crt *x509.Certificate
+	key *rsa.PrivateKey
 }
 
 func NewMySQLDepot(conn string) (*MySQLDepot, error) {
@@ -63,12 +65,38 @@ func (d *MySQLDepot) CreateOrLoadCA(pass []byte, years int, cn, org, country str
 	if err != nil {
 		return nil, nil, err
 	}
-	return nil, nil, ErrNotImplemented
+	encPemBlock, err := x509.EncryptPEMBlock(
+		rand.Reader,
+		"RSA PRIVATE KEY",
+		x509.MarshalPKCS1PrivateKey(privKey),
+		pass,
+		x509.PEMCipher3DES,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	_, err = d.db.ExecContext(
+		d.ctx,
+		`
+INSERT INTO ca_keys
+    (serial, key_pem)
+VALUES
+    (?, ?)`,
+		crt.SerialNumber.Int64(),
+		pem.EncodeToMemory(encPemBlock),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	d.crt = crt
+	d.key = privKey
+	return d.crt, d.key, nil
 }
 
 func (d *MySQLDepot) CA(pass []byte) ([]*x509.Certificate, *rsa.PrivateKey, error) {
-	return nil, nil, ErrNotImplemented
+	return []*x509.Certificate{d.crt}, d.key, nil
 }
+
 func (d *MySQLDepot) Put(name string, crt *x509.Certificate) error {
 	if !crt.SerialNumber.IsInt64() {
 		return errors.New("cannot represent serial number as int64")
@@ -102,5 +130,10 @@ func (d *MySQLDepot) Serial() (*big.Int, error) {
 }
 
 func (d *MySQLDepot) HasCN(cn string, allowTime int, cert *x509.Certificate, revokeOldCertificate bool) (bool, error) {
-	return false, ErrNotImplemented
+	var ct int
+	row := d.db.QueryRowContext(d.ctx, `SELECT COUNT(*) FROM certificates WHERE name = ?`, cn)
+	if err := row.Scan(&ct); err != nil {
+		return false, err
+	}
+	return ct >= 1, nil
 }
