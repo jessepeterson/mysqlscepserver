@@ -19,11 +19,12 @@ import (
 
 func main() {
 	var (
-		flDSN    = flag.String("dsn", "", "SQL data source name (connection string)")
-		flAPIKey = flag.String("api", "", "API key for challenge API endpoints")
-		flListen = flag.String("listen", envString("SCEP_HTTP_LISTEN", ":8080"), "port to listen on")
-		flCAPass = flag.String("capass", envString("SCEP_CA_PASS", ""), "passwd for the ca.key")
-		flDebug  = flag.Bool("debug", envBool("SCEP_LOG_DEBUG"), "enable debug logging")
+		flDSN       = flag.String("dsn", "", "SQL data source name (connection string)")
+		flAPIKey    = flag.String("api", "", "API key for challenge API endpoints")
+		flChallenge = flag.String("challenge", "", "static challenge password (disables dynamic challenges")
+		flListen    = flag.String("listen", envString("SCEP_HTTP_LISTEN", ":8080"), "port to listen on")
+		flCAPass    = flag.String("capass", envString("SCEP_CA_PASS", ""), "passwd for the ca.key")
+		flDebug     = flag.Bool("debug", envBool("SCEP_LOG_DEBUG"), "enable debug logging")
 	)
 	flag.Parse()
 
@@ -59,7 +60,11 @@ func main() {
 		depot.WithValidityDays(3650),
 		depot.WithCAPass(*flCAPass),
 	)
-	signer = challenge.Middleware(mysqlDepot, signer)
+	if *flChallenge == "" {
+		signer = challenge.Middleware(mysqlDepot, signer)
+	} else {
+		signer = scepserver.ChallengeMiddleware(*flChallenge, signer)
+	}
 
 	svc, err := scepserver.NewService(crt, key, signer, scepserver.WithLogger(logger))
 	if err != nil {
