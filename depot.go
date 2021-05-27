@@ -52,6 +52,9 @@ WHERE
     certificates.serial = 1;`,
 	).Scan(&pemCert, &pemKey)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, nil
+		}
 		return nil, nil, err
 	}
 	block, _ := pem.Decode(pemCert)
