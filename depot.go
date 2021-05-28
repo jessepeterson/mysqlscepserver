@@ -4,11 +4,13 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"database/sql"
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"math/big"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -152,6 +154,11 @@ func (d *MySQLDepot) CA(pass []byte) ([]*x509.Certificate, *rsa.PrivateKey, erro
 }
 
 func (d *MySQLDepot) Put(name string, crt *x509.Certificate) error {
+	if crt.Subject.CommonName == "" {
+		// this means our cn was replaced by the certificate Signature
+		// which is inappropriate for a filename
+		name = fmt.Sprintf("%x", sha256.Sum256(crt.Raw))
+	}
 	if !crt.SerialNumber.IsInt64() {
 		return errors.New("cannot represent serial number as int64")
 	}
