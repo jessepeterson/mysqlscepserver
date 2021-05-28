@@ -17,6 +17,8 @@ import (
 	scepserver "github.com/micromdm/scep/v2/server"
 )
 
+var version string
+
 func main() {
 	var (
 		flDSN       = flag.String("dsn", "", "SQL data source name (connection string)")
@@ -25,8 +27,14 @@ func main() {
 		flListen    = flag.String("listen", envString("SCEP_HTTP_LISTEN", ":8080"), "port to listen on")
 		flCAPass    = flag.String("capass", envString("SCEP_CA_PASS", ""), "passwd for the ca.key")
 		flDebug     = flag.Bool("debug", envBool("SCEP_LOG_DEBUG"), "enable debug logging")
+		flVersion   = flag.Bool("version", false, "print version and exit")
 	)
 	flag.Parse()
+
+	if *flVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	logger := log.NewLogfmtLogger(os.Stderr)
 	if !*flDebug {
@@ -83,6 +91,10 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/scep", h)
 	mux.Handle("/challenge", basicAuth(ChallengeHandlerFunc(mysqlDepot, lginfo), "api", *flAPIKey, "SCEP Challenge"))
+	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"version":"` + version + `"}`))
+	})
 
 	// start http server
 	errs := make(chan error, 2)
