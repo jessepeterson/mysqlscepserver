@@ -150,6 +150,9 @@ func (d *MySQLDepot) CreateOrLoadCA(pass []byte, years int, cn, org, country str
 }
 
 func (d *MySQLDepot) CA(pass []byte) ([]*x509.Certificate, *rsa.PrivateKey, error) {
+	if d.crt == nil || d.key == nil {
+		return nil, nil, errors.New("CA crt or key is empty")
+	}
 	return []*x509.Certificate{d.crt}, d.key, nil
 }
 
