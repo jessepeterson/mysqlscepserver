@@ -83,7 +83,7 @@ WHERE
 }
 
 func (d *MySQLDepot) createCA(pass []byte, years int, cn, org, country string) (*x509.Certificate, *rsa.PrivateKey, error) {
-	_, err := d.db.ExecContext(d.ctx, `INSERT IGNORE INTO serials (serial) VALUES (1)`)
+	_, err := d.db.ExecContext(d.ctx, `INSERT IGNORE INTO serials (serial) VALUES (1);`)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -125,7 +125,7 @@ func (d *MySQLDepot) createCA(pass []byte, years int, cn, org, country string) (
 INSERT INTO ca_keys
     (serial, key_pem)
 VALUES
-    (?, ?)`,
+    (?, ?);`,
 		crt.SerialNumber.Int64(),
 		pem.EncodeToMemory(encPemBlock),
 	)
@@ -171,7 +171,7 @@ func (d *MySQLDepot) Put(name string, crt *x509.Certificate) error {
 INSERT INTO certificates
     (serial, name, not_valid_before, not_valid_after, certificate_pem)
 VALUES
-    (?, ?, ?, ?, ?)`,
+    (?, ?, ?, ?, ?);`,
 		crt.SerialNumber.Int64(),
 		name,
 		crt.NotBefore,
@@ -192,7 +192,7 @@ func (d *MySQLDepot) Serial() (*big.Int, error) {
 
 func (d *MySQLDepot) HasCN(cn string, allowTime int, cert *x509.Certificate, revokeOldCertificate bool) (bool, error) {
 	var ct int
-	row := d.db.QueryRowContext(d.ctx, `SELECT COUNT(*) FROM certificates WHERE name = ?`, cn)
+	row := d.db.QueryRowContext(d.ctx, `SELECT COUNT(*) FROM certificates WHERE name = ?;`, cn)
 	if err := row.Scan(&ct); err != nil {
 		return false, err
 	}
