@@ -9,6 +9,8 @@ MYSQLSCEPSERVER=\
 
 my: mysqlscepserver-$(OSARCH)
 
+docker: mysqlscepserver-linux-amd64
+
 $(MYSQLSCEPSERVER):
 	GOOS=$(word 2,$(subst -, ,$@)) GOARCH=$(word 3,$(subst -, ,$(subst .exe,,$@))) go build $(LDFLAGS) -o $@ ./$<
 
@@ -28,4 +30,4 @@ release: $(foreach bin,$(MYSQLSCEPSERVER),$(subst .exe,,$(bin))-$(VERSION).zip)
 test:
 	go test -v -cover -race ./...
 
-.PHONY: my $(MYSQLSCEPSERVER) clean release test
+.PHONY: my docker $(MYSQLSCEPSERVER) clean release test
