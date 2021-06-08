@@ -39,8 +39,6 @@ func NewMySQLDepot(conn string) (*MySQLDepot, error) {
 	}, nil
 }
 
-var ErrNotImplemented = errors.New("not implemented")
-
 func (d *MySQLDepot) loadCA(pass []byte) (*x509.Certificate, *rsa.PrivateKey, error) {
 	var pemCert, pemKey []byte
 	err := d.db.QueryRowContext(
