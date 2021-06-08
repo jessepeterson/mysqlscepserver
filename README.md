@@ -62,7 +62,7 @@ GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=v0.1.0" -o mysqlscep
 ## Docker build and run
 
 ```
-make mysqlscepserver-linux-amd64
+make docker
 docker build . --tag jessepeterson/mysqlscepserver:latest
 docker run -it --rm -p 8080:8080 jessepeterson/mysqlscepserver:latest -dsn 'scepuser:scepsecret@tcp(127.0.0.1:3306)/scepdb' -capass casecret -api apisecret
 ```
