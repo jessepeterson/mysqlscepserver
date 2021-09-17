@@ -31,7 +31,7 @@ CREATE TABLE certificates (
     FOREIGN KEY (serial)
         REFERENCES serials (serial),
 
-    CHECK (SUBSTRING(certificate_pem FROM 1 FOR 27) = '-----BEGIN CERTIFICATE-----')
+    CHECK (SUBSTRING(certificate_pem FROM 1 FOR 27) = '-----BEGIN CERTIFICATE-----'),
     CHECK (name IS NULL OR name != '')
 );
 
