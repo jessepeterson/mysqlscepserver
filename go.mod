@@ -1,4 +1,4 @@
-module github.com/alwatts/mysqlscepserver
+module github.com/jessepeterson/mysqlscepserver
 
 go 1.16
 
