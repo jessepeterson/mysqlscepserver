@@ -37,6 +37,17 @@ level=info ts=2021-05-29T19:01:00.755984Z caller=main.go:102 transport=http list
 
 The DSN is in the form that the [MySQL driver](https://github.com/go-sql-driver/mysql#dsn-data-source-name) expects.
 
+Environment variables can be used instead of command line switches as follows:
+
+| Environment Variable | Equivalent Switch
+|--|--
+| SCEP_API_KEY | -api
+| SCEP_CA_PASS | -capass
+| SCEP_CHALLENGE_PASSWORD | -challenge
+| SCEP_LOG_DEBUG | -debug
+| SCEP_DSN | -dsn
+| SCEP_HTTP_LISTEN | -listen
+
 ## Challenge API
 
 If a static challenge is not specified on the command line then the server uses to SCEP challenges to authenticate SCEP requests. The server has an API for generating one-time-use SCEP challanges:
