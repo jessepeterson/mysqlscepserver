@@ -5,7 +5,8 @@ OSARCH=$(shell go env GOHOSTOS)-$(shell go env GOHOSTARCH)
 MYSQLSCEPSERVER=\
 	mysqlscepserver-darwin-amd64 \
 	mysqlscepserver-darwin-arm64 \
-	mysqlscepserver-linux-amd64
+	mysqlscepserver-linux-amd64 \
+	mysqlscepserver-linux-arm
 
 my: mysqlscepserver-$(OSARCH)
 
