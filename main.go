@@ -23,7 +23,7 @@ func main() {
 	var (
 		flDSN       = flag.String("dsn", envString("SCEP_DSN", ""), "SQL data source name (connection string)")
 		flAPIKey    = flag.String("api", envString("SCEP_API_KEY", ""), "API key for challenge API endpoints")
-		flChallenge = flag.String("challenge", envString("SCEP_CHALLENGE_PASSWORD", ""), "static challenge password (disables dynamic challenges")
+		flChallenge = flag.String("challenge", envString("SCEP_CHALLENGE_PASSWORD", ""), "static challenge password (disables dynamic challenges)")
 		flListen    = flag.String("listen", envString("SCEP_HTTP_LISTEN", ":8080"), "port to listen on")
 		flCAPass    = flag.String("capass", envString("SCEP_CA_PASS", ""), "passwd for the ca.key")
 		flDebug     = flag.Bool("debug", envBool("SCEP_LOG_DEBUG"), "enable debug logging")

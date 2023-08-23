@@ -18,7 +18,7 @@ Either download a release, run Docker, or build from source (below). Once you ha
 MySQL setup and configuration is out of scope for this documentation. But suffice it to say you need a database to connect to with the tables in the `schema.sql` file.
 
 ```
-$ ./mysqlscepserver-darwin-amd64 
+$ ./mysqlscepserver-darwin-amd64
 must supply DSN, CA pass, and API key
 Usage of ./mysqlscepserver-darwin-amd64:
   -api string
@@ -26,7 +26,7 @@ Usage of ./mysqlscepserver-darwin-amd64:
   -capass string
     	passwd for the ca.key
   -challenge string
-    	static challenge password (disables dynamic challenges
+    	static challenge password (disables dynamic challenges)
   -debug
     	enable debug logging
   -dsn string
@@ -81,8 +81,10 @@ GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=v0.1.0" -o mysqlscep
 
 ## Docker build and run
 
+To manually build a Docker image from the source and run it you could do something like this. Note, per above, we also publish Docker images to GHCR.
+
 ```
 make docker
-docker build . --tag jessepeterson/mysqlscepserver:latest
-docker run -it --rm -p 8080:8080 jessepeterson/mysqlscepserver:latest -dsn 'scepuser:scepsecret@tcp(127.0.0.1:3306)/scepdb' -capass casecret -api apisecret
+docker build --tag jessepeterson/mysqlscepserver:source .
+docker run -it --rm -p 8080:8080 jessepeterson/mysqlscepserver:source -dsn 'scepuser:scepsecret@tcp(127.0.0.1:3306)/scepdb' -capass casecret -api apisecret
 ```
