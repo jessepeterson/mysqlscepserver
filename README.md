@@ -2,9 +2,18 @@
 
 `mysqlscepserver` is a small, slightly opinionated SCEP server. It uses a MySQL backend for the CA's storage. `mysqlscepserver` is largely based on the [MicroMDM SCEP](https://github.com/micromdm/scep) server.
 
+## Getting the latest version
+
+* Release `.zip` files containing the server should be attached to every [GitHub release](https://github.com/jessepeterson/mysqlscepserver/releases).
+  * Release zips are also [published](https://github.com/jessepeterson/mysqlscepserver/actions) for every `main` branch commit.
+* A Docker container is built and [published to the GHCR.io](http://ghcr.io/jessepeterson/mysqlscepserver) registry for every release.
+  * `docker pull ghcr.io/jessepeterson/mysqlscepserver:latest` — `docker run ghcr.io/jessepeterson/mysqlscepserver:latest`
+  * A Docker container is also published for every `main` branch commit (and tagged with `:main`)
+* If you have a [Go toolchain installed](https://go.dev/doc/install) you can checkout the source and simply run `make`.
+
 ## Usage:
 
-Either download a release, or build from source (below). Once you have the binary, go ahead and run it:
+Either download a release, run Docker, or build from source (below). Once you have the binary, go ahead and run it:
 
 MySQL setup and configuration is out of scope for this documentation. But suffice it to say you need a database to connect to with the tables in the `schema.sql` file.
 
