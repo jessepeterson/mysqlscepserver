@@ -6,6 +6,7 @@ MYSQLSCEPSERVER=\
 	mysqlscepserver-darwin-amd64 \
 	mysqlscepserver-darwin-arm64 \
 	mysqlscepserver-linux-amd64 \
+	mysqlscepserver-linux-arm64 \
 	mysqlscepserver-linux-arm
 
 my: mysqlscepserver-$(OSARCH)
