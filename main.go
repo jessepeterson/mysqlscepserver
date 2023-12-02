@@ -62,16 +62,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	var signer scepserver.CSRSigner = depot.NewSigner(
+	var signer scepserver.CSRSignerContext = scepserver.SignCSRAdapter(depot.NewSigner(
 		mysqlDepot,
 		depot.WithAllowRenewalDays(0),
 		depot.WithValidityDays(3650),
 		depot.WithCAPass(*flCAPass),
-	)
+	))
 	if *flChallenge == "" {
 		signer = challenge.Middleware(mysqlDepot, signer)
 	} else {
-		signer = scepserver.ChallengeMiddleware(*flChallenge, signer)
+		signer = scepserver.StaticChallengeMiddleware(*flChallenge, signer)
 	}
 
 	svc, err := scepserver.NewService(crt, key, signer, scepserver.WithLogger(logger))
