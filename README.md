@@ -88,3 +88,4 @@ make docker
 docker build --tag jessepeterson/mysqlscepserver:source .
 docker run -it --rm -p 8080:8080 jessepeterson/mysqlscepserver:source -dsn 'scepuser:scepsecret@tcp(127.0.0.1:3306)/scepdb' -capass casecret -api apisecret
 ```
+
