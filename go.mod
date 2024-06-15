@@ -1,8 +1,6 @@
 module github.com/jessepeterson/mysqlscepserver
 
-go 1.21
-
-toolchain go1.21.3
+go 1.19
 
 require (
 	github.com/go-kit/kit v0.13.0
