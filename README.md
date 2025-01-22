@@ -4,6 +4,9 @@
 
 `mysqlscepserver` is a small, slightly opinionated SCEP server. It uses a MySQL backend for the CA's storage. `mysqlscepserver` is largely based on the [MicroMDM SCEP](https://github.com/micromdm/scep) server.
 
+> [!NOTE]
+> The included SCEP server and CA are very basic and lack critical security-related features. You are encouraged to explore a more robust solution such as [github.com/smallstep/certificates](https://github.com/smallstep/certificates). As alluded to in [this blog post](https://micromdm.io/blog/scepping-stone/) this project's SCEP server will not likely be supported in the future.
+
 ## Getting the latest version
 
 * Release `.zip` files containing the server should be attached to every [GitHub release](https://github.com/jessepeterson/mysqlscepserver/releases).
