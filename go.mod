@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/go-kit/kit v0.13.0
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.2
 	github.com/micromdm/scep/v2 v2.3.0
 )
 
