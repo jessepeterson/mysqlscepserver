@@ -9,7 +9,7 @@ body:
     id: support
     attributes:
       label: Maintenance mode
-      description: This project is in maintenance mode and has limited support.
+      description: This project is [in maintenance mode](https://micromdm.io/blog/micromdm-v1-maintenance-mode/) and has limited support.
       options:
         - label: I understand this project is in maintenance mode and has limited support.
           required: true
