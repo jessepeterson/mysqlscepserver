@@ -1,10 +1,11 @@
+name: Issue
 body:
   - type: markdown
     attributes:
       value: |
         GitHub issues are not for support questions.
   - type: checkboxes
-    id: terms
+    id: support
     attributes:
       label: Maintenance mode
       description: This project is in maintenance mode and has limited support.
