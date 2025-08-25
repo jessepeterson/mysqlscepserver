@@ -1,4 +1,5 @@
 name: Issue
+description: Project issue form.
 body:
   - type: markdown
     attributes:
