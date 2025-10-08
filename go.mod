@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/go-kit/kit v0.13.0
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/micromdm/nanolib v0.4.0
 	github.com/micromdm/scep/v2 v2.3.0
 )
 
@@ -20,3 +21,5 @@ require (
 	github.com/smallstep/scep v0.0.0-20241223071629-a37a330173bc // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 )
+
+replace github.com/micromdm/nanolib => github.com/jessepeterson/nanolib v0.4.1-0.20251008064837-4550fbafc0d3

@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/micromdm/nanolib/envflag"
 	"github.com/micromdm/scep/v2/challenge"
 	"github.com/micromdm/scep/v2/depot"
 	scepserver "github.com/micromdm/scep/v2/server"
@@ -21,15 +22,15 @@ var version string
 
 func main() {
 	var (
-		flDSN       = flag.String("dsn", envString("SCEP_DSN", ""), "SQL data source name (connection string)")
-		flAPIKey    = flag.String("api", envString("SCEP_API_KEY", ""), "API key for challenge API endpoints")
-		flChallenge = flag.String("challenge", envString("SCEP_CHALLENGE_PASSWORD", ""), "static challenge password (disables dynamic challenges)")
-		flListen    = flag.String("listen", envString("SCEP_HTTP_LISTEN", ":8080"), "port to listen on")
-		flCAPass    = flag.String("capass", envString("SCEP_CA_PASS", ""), "passwd for the ca.key")
-		flDebug     = flag.Bool("debug", envBool("SCEP_LOG_DEBUG"), "enable debug logging")
+		flDSN       = flag.String("dsn", "", "MySQL data source name (connection string)")
+		flAPIKey    = flag.String("api", "", "API key for challenge API endpoints")
+		flChallenge = flag.String("challenge", "", "static challenge password (disables dynamic challenges)")
+		flListen    = flag.String("listen", ":8080", "port to listen on")
+		flCAPass    = flag.String("capass", "", "passwd for the ca.key")
+		flDebug     = flag.Bool("debug", false, "enable debug logging")
 		flVersion   = flag.Bool("version", false, "print version and exit")
 	)
-	flag.Parse()
+	envflag.Parse("SCEP_", []string{"version"})
 
 	if *flVersion {
 		fmt.Println(version)
@@ -148,18 +149,4 @@ func basicAuth(next http.Handler, username, password, realm string) http.Handler
 		}
 		next.ServeHTTP(w, r)
 	}
-}
-
-func envString(key, def string) string {
-	if env := os.Getenv(key); env != "" {
-		return env
-	}
-	return def
-}
-
-func envBool(key string) bool {
-	if env := os.Getenv(key); env == "true" {
-		return true
-	}
-	return false
 }
