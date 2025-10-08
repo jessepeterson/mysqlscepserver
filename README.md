@@ -27,17 +27,17 @@ $ ./mysqlscepserver-darwin-amd64
 must supply DSN, CA pass, and API key
 Usage of ./mysqlscepserver-darwin-amd64:
   -api string
-    	API key for challenge API endpoints
+    	API key for challenge API endpoints [SCEP_API]
   -capass string
-    	passwd for the ca.key
+    	passwd for the ca.key [SCEP_CAPASS]
   -challenge string
-    	static challenge password (disables dynamic challenges)
+    	static challenge password (disables dynamic challenges) [SCEP_CHALLENGE]
   -debug
-    	enable debug logging
+    	enable debug logging [SCEP_DEBUG]
   -dsn string
-    	SQL data source name (connection string)
+    	MySQL data source name (connection string) [SCEP_DSN]
   -listen string
-    	port to listen on (default ":8080")
+    	port to listen on [SCEP_LISTEN] (default ":8080")
   -version
     	print version and exit
 ```
@@ -51,20 +51,11 @@ level=info ts=2021-05-29T19:01:00.755984Z caller=main.go:102 transport=http list
 
 The DSN is in the form that the [MySQL driver](https://github.com/go-sql-driver/mysql#dsn-data-source-name) expects.
 
-Environment variables can be used instead of command line switches as follows:
-
-| Environment Variable | Equivalent Switch
-|--|--
-| SCEP_API_KEY | -api
-| SCEP_CA_PASS | -capass
-| SCEP_CHALLENGE_PASSWORD | -challenge
-| SCEP_LOG_DEBUG | -debug
-| SCEP_DSN | -dsn
-| SCEP_HTTP_LISTEN | -listen
+Environment variables can be used instead of command line switches. See the help output above, environment variables are listed in square brackets like `SCEP_DEBUG`.
 
 ## Challenge API
 
-If a static challenge is not specified on the command line then the server uses to SCEP challenges to authenticate SCEP requests. The server has an API for generating one-time-use SCEP challanges:
+If a static challenge is not specified on the command line then the server uses dynamic SCEP challenges to authenticate SCEP requests. The server has an API for generating one-time-use SCEP challanges:
 
 ```
 $ curl -u api:apisecret http://localhost:8080/challenge && echo
@@ -73,7 +64,7 @@ $ curl -u api:apisecret http://localhost:8080/challenge && echo
 }
 ```
 
-This challenge can then be used by a SCEP client to authenticate their SCEP request.
+This challenge can then be used by a SCEP client to authenticate the SCEP request.
 
 ## Building
 
