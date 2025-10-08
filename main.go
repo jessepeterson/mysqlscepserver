@@ -104,7 +104,7 @@ func main() {
 		errs <- http.ListenAndServe(*flListen, mux)
 	}()
 	go func() {
-		c := make(chan os.Signal)
+		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT)
 		errs <- fmt.Errorf("%s", <-c)
 	}()
