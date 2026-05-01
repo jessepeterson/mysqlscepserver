@@ -1,16 +1,16 @@
 module github.com/jessepeterson/mysqlscepserver
 
-go 1.19
+go 1.24.0
 
 require (
 	github.com/go-kit/kit v0.13.0
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.10.0
 	github.com/micromdm/nanolib v0.5.1
 	github.com/micromdm/scep/v2 v2.3.0
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
