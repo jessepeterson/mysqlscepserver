@@ -1,6 +1,6 @@
 # mysqlscepserver
 
-[![CI/CD](https://github.com/jessepeterson/mysqlscepserver/workflows/CI%2FCD/badge.svg)](https://github.com/jessepeterson/mysqlscepserver/actions)
+[![CI/CD](https://github.com/jessepeterson/mysqlscepserver/actions/workflows/on-push-pr.yml/badge.svg)](https://github.com/jessepeterson/mysqlscepserver/actions/workflows/on-push-pr.yml)
 
 `mysqlscepserver` is a small, slightly opinionated SCEP server. It uses a MySQL backend for the CA's storage. `mysqlscepserver` is largely based on the [MicroMDM SCEP](https://github.com/micromdm/scep) server.
 
